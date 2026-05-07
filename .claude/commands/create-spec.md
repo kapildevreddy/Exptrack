@@ -54,35 +54,36 @@ Check CLAUDE.md to confirm the requested step is not already marked complete. If
 ## Step 7 — Write the spec
 Generate a spec document with this exact structure:
 
-Spec: <feature_title>
-Overview
+# Spec: <feature_title>
+## Overview
 One paragraph describing what this feature does and why it exists at this stage of the Spendly roadmap.
 
-Depends on
+## Depends on
 Which previous steps this feature requires to be complete.
 
-Routes
+## Routes
 Every new route needed:
 
 METHOD /path — description — access level (public/logged-in)
 If no new routes: state "No new routes".
 
-Database changes
+## Database changes
 Any new tables, columns, or constraints needed. Always verify against database/db.py before writing this. If none: state "No database changes".
 
-Templates
+## Templates
 Create: list new templates with their path
 Modify: list existing templates and what changes
-Files to change
+
+## Files to change
 Every file that will be modified.
 
-Files to create
+## Files to create
 Every new file that will be created.
 
-New dependencies
+## New dependencies
 Any new pip packages. If none: state "No new dependencies".
 
-Rules for implementation
+## Rules for implementation
 Specific constraints Claude must follow. Always include:
 
 - No SQLAlchemy or ORMs
@@ -91,7 +92,7 @@ Specific constraints Claude must follow. Always include:
 - Use CSS variables — never hardcode hex values
 - All templates extend base.html
 
-Definition of done
+## Definition of done
 - A specific testable checklist. Each item must be something that can be verified by running the app.
 ## Step 8 — Save the spec
 Save to: .claude/specs/<step_number>-<feature_slug>.md
