@@ -76,3 +76,10 @@ def create_user(name, email, password):
     conn.commit()
     conn.close()
     return user_id
+
+
+def get_user_by_email(email):
+    conn = get_db()
+    user = conn.execute("SELECT * FROM users WHERE email = ?", (email,)).fetchone()
+    conn.close()
+    return user
