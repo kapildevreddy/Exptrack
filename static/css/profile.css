@@ -1,0 +1,240 @@
+/* ------------------------------------------------------------------ */
+/* Profile page                                                        */
+/* ------------------------------------------------------------------ */
+
+.profile-page {
+    max-width: var(--max-width);
+    margin: 0 auto;
+    padding: 3rem 2rem;
+}
+
+/* ------------------------------------------------------------------ */
+/* Section 1: User info card                                           */
+/* ------------------------------------------------------------------ */
+
+.profile-header {
+    display: flex;
+    align-items: center;
+    gap: 1.75rem;
+    background: var(--paper-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: 2rem;
+    margin-bottom: 2rem;
+}
+
+.profile-avatar {
+    flex-shrink: 0;
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    background: var(--accent);
+    color: var(--paper);
+    font-family: var(--font-display);
+    font-size: 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    letter-spacing: 0.02em;
+}
+
+.profile-identity { display: flex; flex-direction: column; gap: 0.25rem; }
+
+.profile-name {
+    font-family: var(--font-display);
+    font-size: 1.6rem;
+    color: var(--ink);
+    line-height: 1.2;
+}
+
+.profile-email { font-size: 0.9rem; color: var(--ink-muted); }
+
+.profile-since { font-size: 0.8rem; color: var(--ink-faint); }
+
+/* ------------------------------------------------------------------ */
+/* Section 2: Summary stats                                            */
+/* ------------------------------------------------------------------ */
+
+.profile-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.stat-card {
+    background: var(--paper-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: 1.5rem;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.stat-label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--ink-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+}
+
+.stat-value {
+    font-family: var(--font-display);
+    font-size: 1.75rem;
+    color: var(--ink);
+    line-height: 1.1;
+}
+
+/* ------------------------------------------------------------------ */
+/* Section 3: Transaction table                                        */
+/* ------------------------------------------------------------------ */
+
+.profile-transactions { margin-bottom: 2rem; }
+
+.section-title {
+    font-family: var(--font-display);
+    font-size: 1.2rem;
+    color: var(--ink);
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--border);
+}
+
+.table-wrapper {
+    background: var(--paper-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+}
+
+.txn-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.txn-table thead th {
+    padding: 0.75rem 1rem;
+    background: var(--paper-warm);
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--ink-muted);
+    text-align: left;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    border-bottom: 1px solid var(--border);
+}
+
+.txn-table tbody td {
+    padding: 0.8rem 1rem;
+    font-size: 0.9rem;
+    color: var(--ink-soft);
+    border-bottom: 1px solid var(--border-soft);
+}
+
+.txn-table tbody tr:last-child td { border-bottom: none; }
+
+.txn-table tbody tr:hover { background: var(--paper-warm); }
+
+.txn-date { color: var(--ink-muted); font-size: 0.85rem; }
+
+.txn-amount-col { text-align: right; }
+
+.txn-amount {
+    text-align: right;
+    font-weight: 600;
+    color: var(--ink);
+    font-family: var(--font-display);
+    font-size: 0.95rem;
+}
+
+/* ------------------------------------------------------------------ */
+/* Category badges                                                     */
+/* ------------------------------------------------------------------ */
+
+.badge {
+    display: inline-block;
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 0.2rem 0.65rem;
+    border-radius: 999px;
+    text-transform: capitalize;
+}
+
+.badge-food          { background: var(--accent-2-light); color: var(--accent-2); }
+.badge-bills         { background: var(--danger-light);   color: var(--danger); }
+.badge-shopping      { background: var(--accent-light);   color: var(--accent); }
+.badge-health        { background: #f3eef7;               color: #6b3fa0; }
+.badge-entertainment { background: #e8eef8;               color: #2c4a7c; }
+.badge-transport     { background: #e3f0f8;               color: #1c5f8a; }
+.badge-other         { background: var(--border-soft);    color: var(--ink-muted); }
+
+/* ------------------------------------------------------------------ */
+/* Section 4: Category breakdown                                       */
+/* ------------------------------------------------------------------ */
+
+.profile-categories { margin-bottom: 2rem; }
+
+.cat-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    background: var(--paper-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: 1.5rem;
+}
+
+.cat-row-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 0.4rem;
+}
+
+.cat-name { font-size: 0.9rem; font-weight: 500; color: var(--ink-soft); }
+
+.cat-amount { font-size: 0.85rem; color: var(--ink-muted); }
+
+.cat-track {
+    height: 8px;
+    background: var(--border-soft);
+    border-radius: 999px;
+    overflow: hidden;
+    margin-bottom: 0.3rem;
+}
+
+.cat-bar {
+    height: 100%;
+    border-radius: 999px;
+    transition: width 0.4s ease;
+}
+
+.cat-bar-bills         { background: var(--danger); }
+.cat-bar-shopping      { background: var(--accent); }
+.cat-bar-food          { background: var(--accent-2); }
+.cat-bar-health        { background: #8b5e83; }
+.cat-bar-entertainment { background: #5b7fa6; }
+.cat-bar-transport     { background: #3a8db5; }
+.cat-bar-other         { background: var(--border); }
+
+.cat-percent {
+    font-size: 0.75rem;
+    color: var(--ink-faint);
+    text-align: right;
+    display: block;
+}
+
+/* ------------------------------------------------------------------ */
+/* Responsive                                                          */
+/* ------------------------------------------------------------------ */
+
+@media (max-width: 700px) {
+    .profile-header { flex-direction: column; text-align: center; }
+    .profile-stats  { grid-template-columns: 1fr; }
+
+    .txn-table thead th,
+    .txn-table tbody td { padding: 0.6rem 0.75rem; font-size: 0.8rem; }
+}
