@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(Get-ChildItem -Path \"D:\\\\Claude\\\\Exptrack\\\\tests\" -File)",
+      "Bash(Select-Object Name)"
+    ]
+  }
+}
