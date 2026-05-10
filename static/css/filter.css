@@ -1,0 +1,87 @@
+.profile-filter {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.75rem;
+    background: var(--paper-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: 0.875rem 1.25rem;
+    margin-bottom: 1.5rem;
+}
+
+.filter-presets {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.filter-btn {
+    display: inline-block;
+    padding: 0.4rem 0.9rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    background: transparent;
+    color: var(--ink-soft);
+    font-family: var(--font-body);
+    font-size: 0.875rem;
+    text-decoration: none;
+    transition: border-color 0.15s, color 0.15s, background 0.15s;
+}
+
+.filter-btn:hover {
+    border-color: var(--ink);
+    color: var(--ink);
+}
+
+.filter-btn.active {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: var(--paper-card);
+}
+
+.filter-custom {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+    margin-left: auto;
+}
+
+.filter-date-input {
+    width: auto;
+    padding: 0.4rem 0.6rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--font-body);
+    font-size: 0.875rem;
+}
+
+.filter-date-input:focus {
+    outline: none;
+    border-color: var(--accent);
+}
+
+.filter-sep {
+    color: var(--ink-muted);
+    font-size: 0.875rem;
+}
+
+.filter-apply {
+    padding: 0.4rem 1rem;
+    font-size: 0.875rem;
+}
+
+@media (max-width: 640px) {
+    .filter-custom {
+        margin-left: 0;
+        width: 100%;
+    }
+
+    .filter-date-input {
+        flex: 1;
+        min-width: 0;
+    }
+}

@@ -1,4 +1,6 @@
 import sqlite3
+import calendar
+from datetime import date as date_cls, datetime
 from flask import Flask, render_template, request, redirect, url_for, flash, abort, session
 from werkzeug.security import check_password_hash
 from database.db import get_db, init_db, seed_db, create_user, get_user_by_email
@@ -86,19 +88,80 @@ def logout():
     return redirect(url_for("login"))
 
 
+def _preset_date_ranges(today):
+    first_this = today.replace(day=1)
+    last_this = today.replace(day=calendar.monthrange(today.year, today.month)[1])
+
+    lm_year = today.year if today.month > 1 else today.year - 1
+    lm_month = today.month - 1 if today.month > 1 else 12
+    first_last = date_cls(lm_year, lm_month, 1)
+    last_last = date_cls(lm_year, lm_month, calendar.monthrange(lm_year, lm_month)[1])
+
+    m3_ago = today.month - 3
+    y3_ago = today.year
+    if m3_ago <= 0:
+        m3_ago += 12
+        y3_ago -= 1
+    first_3m = date_cls(y3_ago, m3_ago, 1)
+
+    return first_this, last_this, first_last, last_last, first_3m
+
+
 @app.route("/profile")
 def profile():
     if not session.get("user_id"):
         return redirect(url_for("login"))
+
+    today = date_cls.today()
+    first_this, last_this, first_last, last_last, first_3m = _preset_date_ranges(today)
+
+    preset_urls = {
+        "this_month":    url_for("profile", **{"from": first_this.isoformat(), "to": last_this.isoformat()}),
+        "last_month":    url_for("profile", **{"from": first_last.isoformat(), "to": last_last.isoformat()}),
+        "last_3_months": url_for("profile", **{"from": first_3m.isoformat(),   "to": last_last.isoformat()}),
+        "all_time":      url_for("profile", **{"from": "", "to": ""}),
+    }
+
+    raw_from = request.args.get("from", "")
+    raw_to = request.args.get("to", "")
+
+    if "from" not in request.args:
+        from_date = first_this.isoformat()
+        to_date = last_this.isoformat()
+        active_preset = "this_month"
+    elif raw_from == "" and raw_to == "":
+        from_date = None
+        to_date = None
+        active_preset = "all_time"
+    else:
+        try:
+            parsed_from = datetime.strptime(raw_from, "%Y-%m-%d").date()
+            parsed_to = datetime.strptime(raw_to, "%Y-%m-%d").date()
+            if parsed_from > parsed_to:
+                raise ValueError("from must not be after to")
+            from_date = raw_from
+            to_date = raw_to
+            if parsed_from == first_this and parsed_to == last_this:
+                active_preset = "this_month"
+            elif parsed_from == first_last and parsed_to == last_last:
+                active_preset = "last_month"
+            elif parsed_from == first_3m and parsed_to == last_last:
+                active_preset = "last_3_months"
+            else:
+                active_preset = "custom"
+        except ValueError:
+            from_date = first_this.isoformat()
+            to_date = last_this.isoformat()
+            active_preset = "this_month"
 
     user = get_user_by_id(session["user_id"])
     if user is None:
         abort(404)
     user["initials"] = "".join(w[0] for w in user["name"].split()[:2]).upper()
 
-    stats        = get_summary_stats(session["user_id"])
-    transactions = get_recent_transactions(session["user_id"])
-    categories   = get_category_breakdown(session["user_id"])
+    stats        = get_summary_stats(session["user_id"], from_date=from_date, to_date=to_date)
+    transactions = get_recent_transactions(session["user_id"], from_date=from_date, to_date=to_date)
+    categories   = get_category_breakdown(session["user_id"], from_date=from_date, to_date=to_date)
 
     return render_template(
         "profile.html",
@@ -106,6 +169,10 @@ def profile():
         stats=stats,
         transactions=transactions,
         categories=categories,
+        from_date=from_date or "",
+        to_date=to_date or "",
+        active_preset=active_preset,
+        preset_urls=preset_urls,
     )
 
 
