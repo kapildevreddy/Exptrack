@@ -1,3 +1,5 @@
+import os
+import math
 import sqlite3
 import calendar
 from datetime import date as date_cls, datetime
@@ -7,7 +9,7 @@ from database.db import get_db, init_db, seed_db, create_user, get_user_by_email
 from database.queries import get_user_by_id, get_summary_stats, get_recent_transactions, get_category_breakdown
 
 app = Flask(__name__)
-app.secret_key = "dev-secret-change-in-prod"
+app.secret_key = os.environ.get("SECRET_KEY", "dev-secret-change-in-prod")
 
 CATEGORIES = ["Food", "Transport", "Bills", "Health", "Entertainment", "Shopping", "Other"]
 
@@ -191,36 +193,39 @@ def add_expense():
         return redirect(url_for("login"))
 
     if request.method == "POST":
-        amount_raw  = request.form.get("amount", "").strip()
-        category    = request.form.get("category", "").strip()
-        date        = request.form.get("date", "").strip()
-        description = request.form.get("description", "").strip()
+        amount_raw   = request.form.get("amount", "").strip()
+        category     = request.form.get("category", "").strip()
+        expense_date = request.form.get("date", "").strip()
+        description  = request.form.get("description", "").strip()
+
+        errors = []
 
         try:
             amount = float(amount_raw)
-            if amount <= 0:
+            if not math.isfinite(amount) or amount <= 0:
                 raise ValueError
         except ValueError:
-            flash("Amount must be a positive number.", "error")
-            return render_template("add_expense.html", categories=CATEGORIES,
-                                   amount=amount_raw, category=category,
-                                   date=date, description=description)
+            errors.append("Amount must be a positive number.")
 
         if category not in CATEGORIES:
-            flash("Please select a valid category.", "error")
-            return render_template("add_expense.html", categories=CATEGORIES,
-                                   amount=amount_raw, category=category,
-                                   date=date, description=description)
+            errors.append("Please select a valid category.")
 
         try:
-            datetime.strptime(date, "%Y-%m-%d")
+            datetime.strptime(expense_date, "%Y-%m-%d")
         except ValueError:
-            flash("Date must be a valid YYYY-MM-DD date.", "error")
+            errors.append("Date must be a valid YYYY-MM-DD date.")
+
+        if len(description) > 300:
+            errors.append("Description must be 300 characters or fewer.")
+
+        if errors:
+            for msg in errors:
+                flash(msg, "error")
             return render_template("add_expense.html", categories=CATEGORIES,
                                    amount=amount_raw, category=category,
-                                   date=date, description=description)
+                                   date=expense_date, description=description)
 
-        db_add_expense(session["user_id"], amount, category, date, description or None)
+        db_add_expense(session["user_id"], amount, category, expense_date, description)
         flash("Expense added successfully.", "success")
         return redirect(url_for("profile"))
 
@@ -239,4 +244,4 @@ def delete_expense(id):
 
 
 if __name__ == "__main__":
-    app.run(debug=True, port=5001)
+    app.run(debug=os.environ.get("FLASK_DEBUG", "0") == "1", port=5001)

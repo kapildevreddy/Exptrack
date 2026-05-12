@@ -89,7 +89,7 @@ def add_expense(user_id, amount, category, date, description):
     conn = get_db()
     cursor = conn.execute(
         "INSERT INTO expenses (user_id, amount, category, date, description) VALUES (?, ?, ?, ?, ?)",
-        (user_id, amount, category, date, description or None),
+        (user_id, amount, category, date, description or None),  # coerce empty str → NULL
     )
     expense_id = cursor.lastrowid
     conn.commit()
