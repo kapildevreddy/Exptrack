@@ -83,3 +83,15 @@ def get_user_by_email(email):
     user = conn.execute("SELECT * FROM users WHERE email = ?", (email,)).fetchone()
     conn.close()
     return user
+
+
+def add_expense(user_id, amount, category, date, description):
+    conn = get_db()
+    cursor = conn.execute(
+        "INSERT INTO expenses (user_id, amount, category, date, description) VALUES (?, ?, ?, ?, ?)",
+        (user_id, amount, category, date, description or None),
+    )
+    expense_id = cursor.lastrowid
+    conn.commit()
+    conn.close()
+    return expense_id
