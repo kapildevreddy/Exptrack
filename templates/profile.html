@@ -10,6 +10,12 @@
 {% block content %}
 <div class="profile-page">
 
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% for category, message in messages %}
+        <div class="auth-{{ category }}" style="margin-bottom: 1rem;">{{ message }}</div>
+      {% endfor %}
+    {% endwith %}
+
     <section class="profile-header">
         <div class="profile-avatar">{{ user.initials }}</div>
         <div class="profile-identity">
@@ -56,7 +62,10 @@
     </section>
 
     <section class="profile-transactions">
-        <h2 class="section-title">Recent Transactions</h2>
+        <div class="section-title-row">
+            <h2 class="section-title">Recent Transactions</h2>
+            <a href="{{ url_for('add_expense') }}" class="btn-add-expense">+ Add Expense</a>
+        </div>
         <div class="table-wrapper">
             <table class="txn-table">
                 <thead>
