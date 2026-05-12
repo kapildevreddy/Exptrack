@@ -2,7 +2,9 @@
   "permissions": {
     "allow": [
       "Bash(Get-ChildItem -Path \"D:\\\\Claude\\\\Exptrack\\\\tests\" -File)",
-      "Bash(Select-Object Name)"
+      "Bash(Select-Object Name)",
+      "mcp__sqlite__describe_table",
+      "mcp__sqlite__read_query"
     ]
   }
 }
