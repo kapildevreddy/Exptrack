@@ -8,7 +8,7 @@ from werkzeug.security import check_password_hash
 from database.db import (
     get_db, init_db, seed_db, create_user,
     get_user_by_email, add_expense as db_add_expense,
-    get_expense_by_id, update_expense,
+    get_expense_by_id, update_expense, delete_expense,
 )
 from database.queries import get_user_by_id, get_summary_stats, get_recent_transactions, get_category_breakdown
 
@@ -296,9 +296,23 @@ def edit_expense(id):
     )
 
 
-@app.route("/expenses/<int:id>/delete")
-def delete_expense(id):
-    return "Delete expense — coming in Step 9"
+@app.route("/expenses/<int:id>/delete", methods=["GET", "POST"])
+def delete_expense_view(id):
+    if not session.get("user_id"):
+        return redirect(url_for("login"))
+
+    expense = get_expense_by_id(id)
+    if expense is None:
+        abort(404)
+    if expense["user_id"] != session["user_id"]:
+        abort(403)
+
+    if request.method == "POST":
+        delete_expense(id)
+        flash("Expense deleted.", "success")
+        return redirect(url_for("profile"))
+
+    return render_template("delete_expense.html", expense=expense)
 
 
 if __name__ == "__main__":
