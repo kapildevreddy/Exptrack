@@ -57,7 +57,7 @@ def get_recent_transactions(user_id, limit=10, from_date=None, to_date=None):
     conn = get_db()
     try:
         rows = conn.execute(
-            "SELECT date, description, category, amount"
+            "SELECT id, date, description, category, amount"
             " FROM expenses WHERE user_id = ?" + date_clause + " ORDER BY date DESC LIMIT ?",
             [user_id] + date_params + [limit],
         ).fetchall()
