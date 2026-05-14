@@ -169,6 +169,23 @@
 
 .txn-date { color: var(--ink-muted); font-size: 0.85rem; }
 
+.txn-actions { text-align: right; width: 3rem; }
+
+.txn-edit-link {
+    font-size: 0.8rem;
+    color: var(--ink-muted);
+    text-decoration: none;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 0.2rem 0.5rem;
+    transition: color 0.15s, border-color 0.15s;
+}
+
+.txn-edit-link:hover {
+    color: var(--accent);
+    border-color: var(--accent);
+}
+
 .txn-amount-col { text-align: right; }
 
 .txn-amount {
