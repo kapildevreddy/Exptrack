@@ -1,0 +1,13 @@
+{
+    "hook": {
+        "PreToolUsage":[
+            {
+                "matcher": "Bash",
+                "hooks": {
+                    "command": "python .claude/hooks/block-gangerous.py"
+                }
+            }
+
+        ] 
+    }
+}
