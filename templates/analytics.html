@@ -2,37 +2,188 @@
 
 {% block title %}Analytics — Spendly{% endblock %}
 
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/analytics.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/filter.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/profile.css') }}">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+{% endblock %}
+
 {% block content %}
 <div class="analytics-page">
-    <div class="cs-wrapper">
-        <div class="cs-deco cs-deco--tr" aria-hidden="true"></div>
-        <div class="cs-deco cs-deco--bl" aria-hidden="true"></div>
 
-        <div class="cs-card">
-            <div class="cs-icon-box" aria-hidden="true">
-                <svg width="44" height="44" viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <circle cx="22" cy="22" r="17" stroke="white" stroke-width="2.5"/>
-                    <path d="M22 13v9l6 3.5" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-                </svg>
-            </div>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% for category, message in messages %}
+        <div class="auth-{{ category }}" style="margin-bottom: 1rem;">{{ message }}</div>
+      {% endfor %}
+    {% endwith %}
 
-            <span class="cs-badge">COMING SOON</span>
+    <h1 class="analytics-heading">Analytics</h1>
 
-            <h1 class="cs-title">Advanced Analytics</h1>
-
-            <p class="cs-body">
-                We're working on powerful insights and visualizations<br>
-                to help you understand your spending patterns better.
-            </p>
-
-            <div class="cs-dots" aria-hidden="true">
-                <span></span>
-                <span></span>
-                <span></span>
-            </div>
-
-            <p class="cs-tagline">We're crafting something special</p>
+    <section class="profile-filter">
+        <div class="filter-presets">
+            <a href="{{ preset_urls.this_month }}"
+               class="filter-btn{% if active_preset == 'this_month' %} active{% endif %}">This Month</a>
+            <a href="{{ preset_urls.last_month }}"
+               class="filter-btn{% if active_preset == 'last_month' %} active{% endif %}">Last Month</a>
+            <a href="{{ preset_urls.all_time }}"
+               class="filter-btn{% if active_preset == 'all_time' %} active{% endif %}">All Time</a>
         </div>
-    </div>
+        <form class="filter-custom" method="get" action="{{ url_for('analytics') }}">
+            <input type="date" name="from" value="{{ from_date }}"
+                   class="form-input filter-date-input">
+            <span class="filter-sep">to</span>
+            <input type="date" name="to" value="{{ to_date }}"
+                   class="form-input filter-date-input">
+            <button type="submit" class="btn-primary filter-apply">Apply</button>
+        </form>
+    </section>
+
+    <section class="profile-stats">
+        <div class="stat-card">
+            <span class="stat-label">Total Spent</span>
+            <span class="stat-value">&#8377;{{ "%.2f"|format(stats.total_spent) }}</span>
+        </div>
+        <div class="stat-card">
+            <span class="stat-label">Transactions</span>
+            <span class="stat-value">{{ stats.transaction_count }}</span>
+        </div>
+        <div class="stat-card">
+            <span class="stat-label">Top Category</span>
+            <span class="stat-value">{{ stats.top_category }}</span>
+        </div>
+    </section>
+
+    {% if categories or monthly_trend %}
+
+        <section class="analytics-section">
+            <h2 class="section-title">Spending by Category</h2>
+            <div class="chart-container">
+                <canvas id="categoryChart" class="chart-canvas"
+                        aria-label="Horizontal bar chart showing spending by category"
+                        role="img">
+                    Category chart not available.
+                </canvas>
+            </div>
+        </section>
+
+        <section class="analytics-section">
+            <h2 class="section-title">Monthly Trend</h2>
+            <div class="chart-container">
+                <canvas id="trendChart" class="chart-canvas"
+                        aria-label="Vertical bar chart showing monthly spending trend"
+                        role="img">
+                    Monthly trend chart not available.
+                </canvas>
+            </div>
+        </section>
+
+    {% else %}
+        <p class="analytics-empty">No expenses found for this period.</p>
+    {% endif %}
+
 </div>
 {% endblock %}
+
+{% block scripts %}
+<script>
+(function () {
+    const categoryData = {{ categories | tojson }};
+    const trendData    = {{ monthly_trend | tojson }};
+
+    const style       = getComputedStyle(document.documentElement);
+    const accentColor = style.getPropertyValue('--accent').trim();
+    const accent2     = style.getPropertyValue('--accent-2').trim();
+    const inkMuted    = style.getPropertyValue('--ink-muted').trim();
+    const border      = style.getPropertyValue('--border').trim();
+
+    // Shared Chart.js defaults
+    Chart.defaults.font.family = "'DM Sans', system-ui, sans-serif";
+    Chart.defaults.color       = inkMuted;
+
+    // ── Category breakdown — horizontal bar chart ──────────────────
+    const catCanvas = document.getElementById('categoryChart');
+    if (catCanvas && categoryData.length) {
+        new Chart(catCanvas, {
+            type: 'bar',
+            data: {
+                labels:   categoryData.map(function (c) { return c.name; }),
+                datasets: [{
+                    label:           'Amount (₹)',
+                    data:            categoryData.map(function (c) { return c.amount; }),
+                    backgroundColor: accentColor,
+                    borderRadius:    4,
+                    borderSkipped:   false,
+                }]
+            },
+            options: {
+                indexAxis: 'y',
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            label: function (ctx) {
+                                return ' ₹' + ctx.parsed.x.toFixed(2);
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        grid: { color: border },
+                        ticks: {
+                            callback: function (v) { return '₹' + v; }
+                        }
+                    },
+                    y: { grid: { display: false } }
+                }
+            }
+        });
+    }
+
+    // ── Monthly trend — vertical bar chart ────────────────────────
+    const trendCanvas = document.getElementById('trendChart');
+    if (trendCanvas && trendData.length) {
+        new Chart(trendCanvas, {
+            type: 'bar',
+            data: {
+                labels:   trendData.map(function (d) { return d.month; }),
+                datasets: [{
+                    label:           'Total (₹)',
+                    data:            trendData.map(function (d) { return d.total; }),
+                    backgroundColor: accent2,
+                    borderRadius:    4,
+                    borderSkipped:   false,
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            label: function (ctx) {
+                                return ' ₹' + ctx.parsed.y.toFixed(2);
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    x: { grid: { display: false } },
+                    y: {
+                        grid: { color: border },
+                        ticks: {
+                            callback: function (v) { return '₹' + v; }
+                        }
+                    }
+                }
+            }
+        });
+    }
+}());
+</script>
+{% endblock %}
+

@@ -10,7 +10,7 @@ from database.db import (
     get_user_by_email, add_expense as db_add_expense,
     get_expense_by_id, update_expense, delete_expense,
 )
-from database.queries import get_user_by_id, get_summary_stats, get_recent_transactions, get_category_breakdown
+from database.queries import get_user_by_id, get_summary_stats, get_recent_transactions, get_category_breakdown, get_monthly_trend
 
 app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY", "dev-secret-change-in-prod")
@@ -188,7 +188,60 @@ def profile():
 def analytics():
     if not session.get("user_id"):
         return redirect(url_for("login"))
-    return render_template("analytics.html")
+
+    today = date_cls.today()
+    first_this, last_this, first_last, last_last, first_3m = _preset_date_ranges(today)
+
+    preset_urls = {
+        "this_month":  url_for("analytics", **{"from": first_this.isoformat(), "to": last_this.isoformat()}),
+        "last_month":  url_for("analytics", **{"from": first_last.isoformat(), "to": last_last.isoformat()}),
+        "all_time":    url_for("analytics", **{"from": "", "to": ""}),
+    }
+
+    raw_from = request.args.get("from", "")
+    raw_to   = request.args.get("to", "")
+
+    if "from" not in request.args:
+        from_date    = first_this.isoformat()
+        to_date      = last_this.isoformat()
+        active_preset = "this_month"
+    elif raw_from == "" and raw_to == "":
+        from_date    = None
+        to_date      = None
+        active_preset = "all_time"
+    else:
+        try:
+            parsed_from = datetime.strptime(raw_from, "%Y-%m-%d").date()
+            parsed_to   = datetime.strptime(raw_to,   "%Y-%m-%d").date()
+            if parsed_from > parsed_to:
+                raise ValueError("from must not be after to")
+            from_date = raw_from
+            to_date   = raw_to
+            if parsed_from == first_this and parsed_to == last_this:
+                active_preset = "this_month"
+            elif parsed_from == first_last and parsed_to == last_last:
+                active_preset = "last_month"
+            else:
+                active_preset = "custom"
+        except ValueError:
+            from_date    = first_this.isoformat()
+            to_date      = last_this.isoformat()
+            active_preset = "this_month"
+
+    stats         = get_summary_stats(session["user_id"], from_date=from_date, to_date=to_date)
+    categories    = get_category_breakdown(session["user_id"], from_date=from_date, to_date=to_date)
+    monthly_trend = get_monthly_trend(session["user_id"], from_date=from_date, to_date=to_date)
+
+    return render_template(
+        "analytics.html",
+        stats=stats,
+        categories=categories,
+        monthly_trend=monthly_trend,
+        from_date=from_date or "",
+        to_date=to_date or "",
+        active_preset=active_preset,
+        preset_urls=preset_urls,
+    )
 
 
 @app.route("/expenses/add", methods=["GET", "POST"])

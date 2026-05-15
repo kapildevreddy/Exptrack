@@ -89,3 +89,18 @@ def get_category_breakdown(user_id, from_date=None, to_date=None):
     cats[0]["percent"] += remainder
 
     return cats
+
+
+def get_monthly_trend(user_id, from_date=None, to_date=None):
+    date_clause, date_params = _date_filter(from_date, to_date)
+    conn = get_db()
+    try:
+        rows = conn.execute(
+            "SELECT strftime('%Y-%m', date) AS month, SUM(amount) AS total"
+            " FROM expenses WHERE user_id = ?" + date_clause
+            + " GROUP BY month ORDER BY month ASC",
+            [user_id] + date_params,
+        ).fetchall()
+    finally:
+        conn.close()
+    return [{"month": r["month"], "total": float(r["total"])} for r in rows]
